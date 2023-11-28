@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript">
+        // vars
+        var socket = null;
+        var connected = false;
+
+        // main application functions
+        function handle_incoming_message(raw) {
+            // debugging
+            console.log("NEW MESSAGE: " + raw);
+            msg = JSON.parse(raw);
+            //console.dir(msg);
+        }
+
+        function service() {
+            if (connected) {
+                let test_msg = {
+                    "type": "MESSAGE",
+                    "data": "test from ui"
+                };
+                socket.send(JSON.stringify(test_msg));
+            }
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////
+        ////    websocket functions
+        ///////////////////////////////////////////////////////////////////////
+        function ws_data(e) {
+            // parse to json
+            raw = e.data;
+            //msg = JSON.parse(raw);
+            handle_incoming_message(raw);
+        }
+
+        function ws_connect(e) {
+            console.log("ws connected!");
+            connected = true;
+        }
+
+        function ws_disconnect(e) {
+            console.log("ws disconnected!");
+            connected = false;
+        }
+
+        function ws_error(e) {
+            console.log("ws error!");
+            console.dir(e);
+            connected = false;
+        }
+
+
+        function setup_socket() {
+            socket = new WebSocket("ws://" + location.host + "/app_ws");
+            socket.onmessage = ws_data;
+            socket.onopen = ws_connect;
+            socket.onclose = ws_disconnect;
+            socket.onerror = ws_error;
+        }
+
+
+        window.onload = function () {
+            setup_socket();
+            window.setInterval(service, 1000);
+        };
+    </script>
+</head>
+
+<body>
+    <h1>Educational Web Controlled Robot Arm</h1>
+    <div>
+        <h2>Arm Control</h2>
+        <fieldset>
+
+
+            <!--
+            <legend>Mode</legend>
+            <fieldset>
+                <legend>Status</legend>
+                <ul>
+                    <li id="autoseeder_mode">mode: waiting...</li>
+                </ul>
+            </fieldset>
+            -->
+
+            <!-- light -->
+
+            <!-- move the arm
+                go to home
+                go to position joint
+                move relative
+                go to position cartesian 
+                move relative cart
+            
+            display telemetry
+                joint angles, ee position
+            
+            -->
+            
+            <form method="POST" action="/go_home" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>ROUTINES AND SET FUNCTION</legend>
+                    <button type="submit" name="command" value="home">GO HOME</button>
+                    <button type="submit" name="command" value="workspace_demo">WORKSPACE DEMO</button>
+                </fieldset>
+            </form>
+
+            <form method="POST" action="/move_joint_space" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>MOVE TO JOINT ANGLE</legend>
+
+                    <label for="theta1">theta 1: (degrees)</label>
+                    <!-- should tie the below min/max to the actuator min/max -->
+                    <input name="theta1" type="number" id="theta1_deg" value="0" min="-90" max="90" step="5">
+                    <br>
+                    <label for="theta2">theta 2: (degrees)</label>
+                    <!-- should tie the below min/max to the actuator min/max -->
+                    <input name="theta2" type="number" id="theta2_deg" value="0" min="-90" max="90" step="5">
+                    <br>
+                    <br>
+                    <button type="submit" name=>GO TO POSITION</button>
+                </fieldset>
+            </form>
+            <form method="POST" action="/move_cartesian_space" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>MOVE END EFFECTOR TO POSITION</legend>
+            
+                    <label for="x">x: (mm)</label>
+                    <!-- should tie the below min/max to the actuator min/max -->
+                    <input name="x" type="number" id="x_mm" value="0" min="-90" max="90" step="5">
+                    <br>
+                    <label for="y">y: (mm)</label>
+                    <!-- should tie the below min/max to the actuator min/max -->
+                    <input name="y" type="number" id="y_mm" value="0" min="-90" max="90" step="5">
+                    <br>
+                    <br>
+                    <button type="submit">GO TO POSITION</button>
+                </fieldset>
+            </form>
+        </fieldset>
+    </div>
+
+    <div>
+        <h2>video feeds</h2>
+        <img id="camera_stream" , src="/streams/main_camera">
+    </div>
+           
+            <!-- <form method="POST" action="/seed_station_set_valves">
+                <fieldset>
+                    <legend>Set valves</legend>
+                    <input name="valve_select" type="checkbox" id="valve_select">
+                    <label for="valve_select">select</label>
+                    <br>
+                    <input name="valve_flow_switch" type="checkbox" id="valve_flow_switch">
+                    <label for="valve_flow_switch">flow switch</label>
+                    <br>
+                    <input name="valve_overpressure" type="checkbox" id="valve_overpressure">
+                    <label for="valve_overpressure">overpressure</label>
+                    <br>
+                    <br>
+                    <button type="submit">SET VALVES</button>
+                </fieldset>
+            </form> -->
+                    <!-- <legend>Set active nozzles</legend>
+                    <input type="radio" id="1_nozzle" name="nozzle_selection" value="1" checked>
+                    <label for="1_nozzle">1 nozzle</label><br>
+                    <input type="radio" id="2_nozzles" name="nozzle_selection" value="2">
+                    <label for="2_nozzles">2 nozzles</label><br>
+                    <input type="radio" id="3_nozzles" name="nozzle_selection" value="3">
+                    <label for="3_nozzles">3 nozzles</label><br>
+                    <input type="radio" id="4_nozzles" name="nozzle_selection" value="4">
+                    <label for="4_nozzles">4 nozzles</label>
+                    <br>
+                    <br>
+                    <button type="submit">SET NOZZLES</button> -->
+
+</body>
+
+</html>
